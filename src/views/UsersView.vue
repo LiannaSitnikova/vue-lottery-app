@@ -5,7 +5,6 @@ import { useUsersStore } from '../stores/users.store';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
 import WinnersList from '../components/WinnersList.vue';
-import type { User } from '../types';
 
 const route = useRoute();
 const router = useRouter();
