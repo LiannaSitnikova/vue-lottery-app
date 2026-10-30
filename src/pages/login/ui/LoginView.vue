@@ -2,10 +2,10 @@
 import { ref } from 'vue';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
-import { useAuthStore } from '@/stores/auth.store';
+import { useSessionStore } from '@/entities/session';
 import { useRouter, useRoute } from 'vue-router';
 
-const authStore = useAuthStore();
+const sessionStore = useSessionStore();
 const router = useRouter();
 const route = useRoute();
 const serverError = ref('');
@@ -26,7 +26,7 @@ const [password, passwordAttrs] = defineField('password');
 const onSubmit = handleSubmit(async (values) => {
   serverError.value = '';
   try {
-    await authStore.login(values.username, values.password);
+    await sessionStore.login(values.username, values.password);
     const redirectPath = (route.query.redirect as string) || '/users';
     router.push(redirectPath);
   } catch (e: any) {

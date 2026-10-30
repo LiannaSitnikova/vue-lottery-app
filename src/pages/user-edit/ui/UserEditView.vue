@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ServiceProvider } from '@/shared/api';
 import type { UserService } from '@/entities/user';
-import { useUsersStore } from '@/stores/users.store';
+import { useUsersStore } from '@/entities/user';
 
 const props = defineProps<{ id: string }>();
 const router = useRouter();

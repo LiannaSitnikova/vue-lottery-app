@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useUsersStore } from '@/stores/users.store';
+import { useUsersStore } from '@/entities/user';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
 import { WinnersList } from '@/widgets/winners-list';
@@ -102,7 +102,7 @@ const [phone] = defineField('phone');
 
 const onCreateUser = handleSubmit(async (values) => {
   try {
-    await usersStore.addUser(values as any);
+    await usersStore.createUser(values as any); 
     isAddModalOpen.value = false;
     resetForm();
   } catch (e: any) {

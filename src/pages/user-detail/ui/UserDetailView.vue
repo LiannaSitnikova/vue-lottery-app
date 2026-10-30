@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { ServiceProvider } from '@/shared/api';
-import type { User, UserService } from '@/entities/user';
+import { useUsersStore } from '@/entities/user';
+import type { User } from '@/entities/user';
 
 const props = defineProps<{ id: string }>();
+const usersStore = useUsersStore();
 const user = ref<User | null>(null);
 const isLoading = ref(true);
 
 onMounted(async () => {
   try {
-    const userService = ServiceProvider.get<UserService>('users');
-    user.value = await userService.getById(Number(props.id));
+    user.value = await usersStore.fetchUserById(Number(props.id));
+  } catch (e) {
+    console.error('Помилка завантаження користувача:', e);
   } finally {
     isLoading.value = false;
   }

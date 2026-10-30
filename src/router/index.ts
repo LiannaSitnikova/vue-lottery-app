@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { useAuthStore } from '../stores/auth.store';
+import { useSessionStore } from '@/entities/session';
 import DefaultLayout from '@/app/layouts/DefaultLayout.vue';
 import AuthLayout from '@/app/layouts/AuthLayout.vue';
 
@@ -68,13 +68,13 @@ const router = createRouter({
 });
 
 router.beforeEach((to, _, next) => {
-  const authStore = useAuthStore();
+  const sessionStore = useSessionStore();
   
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+  if (to.meta.requiresAuth && !sessionStore.isAuthenticated) {
     return next({ name: 'login', query: { redirect: to.fullPath } });
   }
 
-  if (to.name === 'login' && authStore.isAuthenticated) {
+  if (to.name === 'login' && sessionStore.isAuthenticated) {
     return next({ name: 'users' });
   }
 
