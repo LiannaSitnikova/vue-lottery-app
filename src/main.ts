@@ -2,12 +2,14 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
+import ConfirmationService from 'primevue/confirmationservice';
 import Aura from '@primevue/themes/aura';
 
 import App from './App.vue';
 import router from './router';
-import './assets/main.scss';
 import { registerServices } from '@/app/providers/services';
+import './assets/main.scss';
 
 registerServices();
 
@@ -26,5 +28,7 @@ app.use(PrimeVue, {
     },
   },
 });
+app.use(ToastService);
+app.use(ConfirmationService);
 
 app.mount('#app');

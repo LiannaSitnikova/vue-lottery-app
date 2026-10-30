@@ -1,24 +1,28 @@
 <script setup lang="ts">
-defineProps<{
+import Button from 'primevue/button';
+
+const props = defineProps<{
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
   variant?: 'primary' | 'danger' | 'secondary';
 }>();
 
-defineEmits<{(e: 'click'): void}>();
+defineEmits<{(e: 'click', event: MouseEvent): void}>();
+
+const getSeverity = () => {
+  if (props.variant === 'danger') return 'danger';
+  if (props.variant === 'secondary') return 'secondary';
+  return 'primary';
+};
 </script>
 
 <template>
-  <button
+  <Button
     :type="type || 'button'"
     :disabled="disabled"
-    class="px-4 py-2 bg-sky-500 text-white text-sm font-medium rounded hover:bg-sky-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition cursor-pointer"
-    :class="{
-      'bg-red-500 hover:bg-red-600': variant === 'danger',
-      'bg-gray-500 hover:bg-gray-600': variant === 'secondary'
-    }"
-    @click="$emit('click')"
+    :severity="getSeverity()"
+    @click="$emit('click', $event)"
   >
     <slot />
-  </button>
+  </Button>
 </template>

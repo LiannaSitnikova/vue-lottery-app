@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import InputText from 'primevue/inputtext';
+
 defineProps<{
   modelValue: string;
   label?: string;
@@ -12,21 +14,17 @@ defineEmits<{(e: 'update:modelValue', value: string): void}>();
 </script>
 
 <template>
-  <div class="mb-4">
-    <label v-if="label" class="block text-sm font-semibold text-gray-700 mb-1">
+  <div class="mb-4 text-left">
+    <label v-if="label" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
       {{ label }}
     </label>
     <div class="relative">
-      <input
+      <InputText
         :type="type || 'text'"
         :value="modelValue"
         :placeholder="placeholder"
-        class="w-full pl-3 pr-10 py-2 border rounded text-sm focus:outline-none transition date-input-custom"
-        :class="{
-          'border-red-500 bg-red-50 focus:border-red-500': error,
-          'border-emerald-500 bg-emerald-50': isValid && !error,
-          'border-gray-300 focus:border-sky-500': !error && !isValid
-        }"
+        :invalid="!!error"
+        class="w-full text-sm p-2 border rounded"
         @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
       />
       <span
@@ -36,13 +34,6 @@ defineEmits<{(e: 'update:modelValue', value: string): void}>();
         ✓
       </span>
     </div>
-    <p v-if="error" class="text-xs text-red-500 mt-1">{{ error }}</p>
+    <p v-if="error" class="text-xs text-red-500 mt-1 min-h-[16px]">{{ error }}</p>
   </div>
 </template>
-
-<style scoped>
-input[type="date"]::-webkit-calendar-picker-indicator {
-  margin-right: -15px;
-  cursor: pointer;
-}
-</style>

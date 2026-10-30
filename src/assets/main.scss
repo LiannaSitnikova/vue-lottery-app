@@ -1,7 +1,67 @@
 @use "tailwindcss";
 @import "primeicons/primeicons.css";
 
-body {
-  background-color: #f3f4f6;
-  font-family: sans-serif;
+html.dark {
+  background-color: #121827;
+  color: #f3f4f6;
+
+  body {
+    background-color: #121827;
+    color: #f3f4f6;
+  }
+
+  .bg-white {
+    background-color: #1f2937 !important;
+    color: #f3f4f6 !important;
+    border-color: #374151 !important;
+  }
+
+  .bg-gray-50, .bg-gray-100 {
+    background-color: #111827 !important;
+  }
+
+  .text-gray-800, .text-gray-700, .text-gray-600 {
+    color: #e5e7eb !important;
+  }
+
+  table thead {
+    background-color: #374151 !important;
+    color: #f3f4f6 !important;
+  }
+
+  input {
+    background-color: #374151 !important;
+    color: #ffffff !important;
+    border-color: #4b5563 !important;
+  }
+
+  tr:hover, 
+  .hover\:bg-gray-50:hover, 
+  .hover\:bg-gray-100:hover {
+    background-color: #334155 !important; 
+    color: #ffffff !important;
+  }
+
+  td, th {
+    border-color: #374151 !important;
+  }
+
+  .bg-gray-200, 
+  .bg-gray-300, 
+  .bg-gray-500,
+  .p-button-secondary {
+    background-color: #374151 !important; 
+    color: #f3f4f6 !important;           
+    border-color: #4b5563 !important;
+
+    &:hover {
+      background-color: #4b5563 !important;
+      color: #ffffff !important;
+    }
+  }
+
+   a.bg-gray-200,
+  button.bg-gray-200 {
+    color: #f3f4f6 !important;
+  }
 }
