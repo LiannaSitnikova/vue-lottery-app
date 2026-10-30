@@ -4,6 +4,7 @@ import { useForm } from 'vee-validate';
 import * as yup from 'yup';
 import { useSessionStore } from '@/entities/session';
 import { useRouter, useRoute } from 'vue-router';
+import { AppButton, AppInput } from '@/shared/ui';
 
 const sessionStore = useSessionStore();
 const router = useRouter();
@@ -20,8 +21,8 @@ const { handleSubmit, errors, defineField } = useForm({
   initialValues: { username: 'emilys', password: 'emilyspass' },
 });
 
-const [username, usernameAttrs] = defineField('username');
-const [password, passwordAttrs] = defineField('password');
+const [username] = defineField('username');
+const [password] = defineField('password');
 
 const onSubmit = handleSubmit(async (values) => {
   serverError.value = '';
@@ -36,26 +37,29 @@ const onSubmit = handleSubmit(async (values) => {
 </script>
 
 <template>
-  <div class="bg-white p-8 rounded-lg shadow-md">
-    <h2 class="text-xl font-bold mb-6 text-center">Авторизація</h2>
-    <form @submit="onSubmit" class="space-y-4">
-      <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Username</label>
-        <input v-model="username" v-bind="usernameAttrs" type="text" class="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:border-sky-500" />
-        <span class="text-xs text-red-500">{{ errors.username }}</span>
-      </div>
+  <div class="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-md max-w-md mx-auto transition-colors">
+    <h2 class="text-xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">Авторизація</h2>
+    
+    <form @submit="onSubmit">
+      <AppInput
+        v-model="username"
+        label="Username"
+        type="text"
+        :error="errors.username"
+      />
 
-      <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
-        <input v-model="password" v-bind="passwordAttrs" type="password" class="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:border-sky-500" />
-        <span class="text-xs text-red-500">{{ errors.password }}</span>
-      </div>
+      <AppInput
+        v-model="password"
+        label="Password"
+        type="password"
+        :error="errors.password"
+      />
 
-      <p v-if="serverError" class="text-xs text-red-500 text-center">{{ serverError }}</p>
+      <p v-if="serverError" class="text-xs text-red-500 text-center mb-3">{{ serverError }}</p>
 
-      <button type="submit" class="w-full py-2 bg-sky-500 text-white font-medium rounded hover:bg-sky-600 transition cursor-pointer">
+      <AppButton type="submit" variant="primary" class="w-full">
         Login
-      </button>
+      </AppButton>
     </form>
   </div>
 </template>

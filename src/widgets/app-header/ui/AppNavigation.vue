@@ -2,7 +2,7 @@
 import { onMounted } from 'vue';
 import { useSessionStore } from '@/entities/session';
 import { useThemeStore } from '@/entities/theme';
-import { BaseButton } from '@/shared/ui';
+import { AppButton } from '@/shared/ui';
 import { useRouter } from 'vue-router';
 
 const sessionStore = useSessionStore();
@@ -21,34 +21,48 @@ const handleLogout = () => {
 
 <template>
   <nav class="flex items-center gap-4 text-sm font-medium">
-    <router-link to="/" class="text-gray-600 dark:text-gray-300 hover:text-sky-600" active-class="text-sky-600 font-bold" exact-active-class="text-sky-600 font-bold">
+    <router-link 
+      to="/" 
+      class="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400" 
+      active-class="text-emerald-600 dark:text-emerald-400 font-bold" 
+      exact-active-class="text-emerald-600 dark:text-emerald-400 font-bold"
+    >
       Home
     </router-link>
-    <router-link to="/about" class="text-gray-600 dark:text-gray-300 hover:text-sky-600" active-class="text-sky-600 font-bold">
+    <router-link 
+      to="/about" 
+      class="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400" 
+      active-class="text-emerald-600 dark:text-emerald-400 font-bold"
+    >
       About Author
     </router-link>
-    <router-link v-if="sessionStore.isAuthenticated" to="/users" class="text-gray-600 dark:text-gray-300 hover:text-sky-600" active-class="text-sky-600 font-bold">
+    <router-link 
+      v-if="sessionStore.isAuthenticated" 
+      to="/users" 
+      class="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400" 
+      active-class="text-emerald-600 dark:text-emerald-400 font-bold"
+    >
       Users
     </router-link>
-    
-    <BaseButton
+
+    <AppButton
       type="button"
       variant="secondary"
       @click="themeStore.toggleTheme"
     >
       {{ themeStore.isDark ? 'Light' : 'Dark' }}
-    </BaseButton>
+    </AppButton>
 
     <router-link v-if="!sessionStore.isAuthenticated" to="/login">
-      <BaseButton variant="primary">Login</BaseButton>
+      <AppButton variant="primary">Login</AppButton>
     </router-link>
     
-    <BaseButton
+    <AppButton
       v-else
       variant="danger"
       @click="handleLogout"
     >
       Logout
-    </BaseButton>
+    </AppButton>
   </nav>
 </template>

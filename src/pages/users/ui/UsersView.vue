@@ -5,10 +5,15 @@ import { useUsersStore } from '@/entities/user';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
 import { WinnersList } from '@/widgets/winners-list';
+import { AppButton, AppInput } from '@/shared/ui';
+import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
 
 const route = useRoute();
 const router = useRouter();
 const usersStore = useUsersStore();
+const toast = useToast();
+const confirm = useConfirm();
 
 const isAddModalOpen = ref(false);
 const limit = 8;
@@ -67,11 +72,12 @@ const loadData = () => {
 watch(() => route.query, loadData);
 
 let timeoutId: ReturnType<typeof setTimeout>;
-const onSearchInput = (val: string) => {
-  searchQuery.value = val;
+const onSearchInput = (val: string | number) => {
+  const strVal = String(val);
+  searchQuery.value = strVal;
   clearTimeout(timeoutId);
   timeoutId = setTimeout(() => {
-    router.push({ query: { ...route.query, q: val || undefined, page: 1 } });
+    router.push({ query: { ...route.query, q: strVal || undefined, page: 1 } });
   }, 300);
 };
 
@@ -105,18 +111,30 @@ const onCreateUser = handleSubmit(async (values) => {
     await usersStore.createUser(values as any); 
     isAddModalOpen.value = false;
     resetForm();
+    toast.add({ severity: 'success', summary: 'Успіх', detail: 'Користувача успішно створено!', life: 3000 });
   } catch (e: any) {
-    alert('Помилка створення: ' + e.message);
+    toast.add({ severity: 'error', summary: 'Помилка', detail: e.message || 'Не вдалося створити користувача', life: 3000 });
   }
 });
 
-const deleteUser = async (id: number) => {
-  try {
-    await usersStore.removeUser(id);
-    handleRemoveWinner(id); 
-  } catch (e: any) {
-    alert('Помилка видалення: ' + e.message);
-  }
+const deleteUser = (id: number) => {
+  confirm.require({
+    message: 'Ви впевнені, що хочете видалити цього користувача?',
+    header: 'Підтвердження видалення',
+    icon: 'pi pi-exclamation-triangle',
+    rejectLabel: 'Скасувати',
+    acceptLabel: 'Видалити',
+    acceptClass: 'p-button-danger',
+    accept: async () => {
+      try {
+        await usersStore.removeUser(id);
+        handleRemoveWinner(id); 
+        toast.add({ severity: 'info', summary: 'Видалено', detail: 'Користувача видалено', life: 3000 });
+      } catch (e: any) {
+        toast.add({ severity: 'error', summary: 'Помилка', detail: e.message || 'Не вдалося видалити', life: 3000 });
+      }
+    }
+  });
 };
 </script>
 
@@ -130,27 +148,27 @@ const deleteUser = async (id: number) => {
       @remove-winner="handleRemoveWinner"
     />
 
-    <div class="bg-white p-6 rounded-xl shadow-sm">
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm transition-colors">
       <div class="flex justify-between items-center mb-6">
-        <h1 class="text-xl font-bold text-gray-800">Користувачі</h1>
-        <button @click="isAddModalOpen = true" class="px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 active:bg-sky-700 transition cursor-pointer text-sm font-medium">Додати користувача</button>
+        <h1 class="text-xl font-bold text-gray-800 dark:text-gray-100">Користувачі</h1>
+        <AppButton variant="primary" @click="isAddModalOpen = true">
+          Додати користувача
+        </AppButton>
       </div>
 
       <div class="mb-4">
-        <input
-          :value="searchQuery"
-          @input="onSearchInput(($event.target as HTMLInputElement).value)"
-          type="text"
+        <AppInput
+          :model-value="searchQuery"
           placeholder="Пошук користувачів..."
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500 transition"
+          @update:model-value="onSearchInput"
         />
       </div>
 
       <div v-if="usersStore.errorMessage" class="text-center py-6 text-red-500">{{ usersStore.errorMessage }}</div>
 
       <div class="relative transition-opacity duration-300" :class="{ 'opacity-40 pointer-events-none': usersStore.isLoading }">
-        <table class="w-full text-left text-sm text-gray-600">
-          <thead class="border-b bg-gray-50 uppercase text-xs">
+        <table class="w-full text-left text-sm text-gray-600 dark:text-gray-300">
+          <thead class="border-b dark:border-slate-700 bg-gray-50 dark:bg-slate-700 uppercase text-xs">
             <tr>
               <th class="p-3">ID</th>
               <th class="p-3">Name</th>
@@ -160,15 +178,19 @@ const deleteUser = async (id: number) => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="user in usersStore.users" :key="user.id" class="border-b hover:bg-gray-50 transition-colors">
+            <tr v-for="user in usersStore.users" :key="user.id" class="border-b dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
               <td class="p-3">{{ user.id }}</td>
               <td class="p-3">{{ user.firstName }} {{ user.lastName }}</td>
               <td class="p-3">{{ user.email }}</td>
               <td class="p-3">{{ user.username }}</td>
               <td class="p-3 text-center flex justify-center gap-2">
-                <router-link :to="`/users/${user.id}`" class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 text-xs">Переглянути</router-link>
-                <router-link :to="`/users/${user.id}/edit`" class="px-3 py-1 bg-sky-500 text-white rounded hover:bg-sky-600 text-xs">Редагувати</router-link>
-                <button @click="deleteUser(user.id)" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs cursor-pointer">Видалити</button>
+                <router-link :to="`/users/${user.id}`">
+                  <AppButton variant="secondary" size="small">Переглянути</AppButton>
+                </router-link>
+                <router-link :to="`/users/${user.id}/edit`">
+                  <AppButton variant="primary" size="small">Редагувати</AppButton>
+                </router-link>
+                <AppButton variant="danger" size="small" @click="deleteUser(user.id)">Видалити</AppButton>
               </td>
             </tr>
           </tbody>
@@ -176,76 +198,49 @@ const deleteUser = async (id: number) => {
       </div>
 
       <div class="flex justify-between items-center mt-6">
-        <button :disabled="page <= 1 || usersStore.isLoading" @click="changePage(page - 1)" class="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 active:bg-gray-400 disabled:opacity-50 transition cursor-pointer text-sm">Назад</button>
-        <span class="text-sm font-semibold text-gray-600">Сторінка {{ page }}</span>
-        <button :disabled="page * limit >= usersStore.total || usersStore.isLoading" @click="changePage(page + 1)" class="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 active:bg-gray-400 disabled:opacity-50 transition cursor-pointer text-sm">Вперед</button>
+        <AppButton 
+          variant="secondary" 
+          :disabled="page <= 1 || usersStore.isLoading" 
+          @click="changePage(page - 1)"
+        >
+          Назад
+        </AppButton>
+
+        <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">Сторінка {{ page }}</span>
+
+        <AppButton 
+          variant="secondary" 
+          :disabled="page * limit >= usersStore.total || usersStore.isLoading" 
+          @click="changePage(page + 1)"
+        >
+          Вперед
+        </AppButton>
       </div>
 
+      <!-- Модальне вікно створення користувача -->
       <div v-if="isAddModalOpen" class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-        <div class="bg-white p-8 rounded-xl shadow-xl w-full max-w-2xl transform transition-all">
-          <h3 class="text-xl font-bold mb-6 text-gray-800 border-b pb-3">Створити нового користувача</h3>
+        <div class="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-xl w-full max-w-2xl transform transition-all">
+          <h3 class="text-xl font-bold mb-6 text-gray-800 dark:text-gray-100 border-b dark:border-slate-700 pb-3">
+            Створити нового користувача
+          </h3>
           
-          <form @submit="onCreateUser" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">First Name</label>
-              <input v-model="firstName" placeholder="Введіть ім'я" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500 transition" />
-              <span class="block text-xs text-red-500 mt-1 min-h-[16px]">{{ errors.firstName ? 'Поле є обов\'язковим' : '' }}</span>
-            </div>
-            
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Last Name</label>
-              <input v-model="lastName" placeholder="Введіть прізвище" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500 transition" />
-              <span class="block text-xs text-red-500 mt-1 min-h-[16px]">{{ errors.lastName ? 'Поле є обов\'язковим' : '' }}</span>
-            </div>
+          <form @submit="onCreateUser" class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
+            <AppInput v-model="firstName" label="First Name" placeholder="Введіть ім'я" :error="errors.firstName" />
+            <AppInput v-model="lastName" label="Last Name" placeholder="Введіть прізвище" :error="errors.lastName" />
+            <AppInput v-model="email" label="Email" placeholder="example@mail.com" :error="errors.email" />
+            <AppInput v-model="username" label="Username" placeholder="username" :error="errors.username" />
+            <AppInput v-model="password" type="password" label="Password" placeholder="••••••••" :error="errors.password" />
+            <AppInput v-model="age" type="number" label="Age" placeholder="Вік" :error="errors.age" />
+            <AppInput v-model="gender" label="Gender" placeholder="male / female" :error="errors.gender" />
+            <AppInput v-model="phone" label="Phone" placeholder="+380..." :error="errors.phone" />
 
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Email</label>
-              <input v-model="email" placeholder="example@mail.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500 transition" />
-              <span class="block text-xs text-red-500 mt-1 min-h-[16px]">{{ errors.email || '' }}</span>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Username</label>
-              <input v-model="username" placeholder="username" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500 transition" />
-              <span class="block text-xs text-red-500 mt-1 min-h-[16px]">{{ errors.username ? 'Поле є обов\'язковим' : '' }}</span>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Password</label>
-              <input v-model="password" type="password" placeholder="••••••••" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500 transition" />
-              <span class="block text-xs text-red-500 mt-1 min-h-[16px]">{{ errors.password || '' }}</span>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Age</label>
-              <input v-model="age" type="number" placeholder="Вік" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500 transition" />
-              <span class="block text-xs text-red-500 mt-1 min-h-[16px]">{{ errors.age ? 'Поле є обов\'язковим' : '' }}</span>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Gender</label>
-              <input v-model="gender" placeholder="male / female" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500 transition" />
-              <span class="block text-`xs` text-red-500 mt-1 min-h-[16px]">{{ errors.gender ? 'Поле є обов\'язковим' : '' }}</span>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Phone</label>
-              <input v-model="phone" placeholder="+380..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500 transition" />
-              <span class="block text-xs text-red-500 mt-1 min-h-[16px]">{{ errors.phone ? 'Поле є обов\'язковим' : '' }}</span>
-            </div>
-
-            <div class="md:col-span-2 flex justify-end gap-3 mt-4 border-t pt-4">
-              <button 
-                type="button" 
-                @click="isAddModalOpen = false" 
-                class="px-5 py-2.5 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 active:bg-gray-400 transition cursor-pointer text-sm">
+            <div class="md:col-span-2 flex justify-end gap-3 mt-4 border-t dark:border-slate-700 pt-4">
+              <AppButton type="button" variant="secondary" @click="isAddModalOpen = false">
                 Скасувати
-              </button>
-              <button 
-                type="submit" 
-                class="px-5 py-2.5 bg-sky-500 text-white font-medium rounded-lg hover:bg-sky-600 active:bg-sky-700 transition cursor-pointer shadow-sm text-sm">
+              </AppButton>
+              <AppButton type="submit" variant="primary">
                 Зберегти
-              </button>
+              </AppButton>
             </div>
           </form>
         </div>

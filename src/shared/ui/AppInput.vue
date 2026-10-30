@@ -2,7 +2,7 @@
 import InputText from 'primevue/inputtext';
 
 defineProps<{
-  modelValue: string;
+  modelValue: string | number;
   label?: string;
   type?: string;
   placeholder?: string;
@@ -10,7 +10,7 @@ defineProps<{
   isValid?: boolean;
 }>();
 
-defineEmits<{(e: 'update:modelValue', value: string): void}>();
+defineEmits<{(e: 'update:modelValue', value: string | number): void}>();
 </script>
 
 <template>

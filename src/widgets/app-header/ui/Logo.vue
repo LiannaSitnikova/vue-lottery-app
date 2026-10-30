@@ -1,5 +1,6 @@
 <template>
-  <router-link to="/" class="text-xl font-bold text-sky-600 flex items-center gap-2">
-    <span>🎲 LotteryApp</span>
+  <router-link to="/" class="flex items-center gap-2 font-bold text-xl text-emerald-600 dark:text-emerald-400">
+    <span class="text-2xl">🎲</span>
+    <span>LotteryApp</span>
   </router-link>
 </template>
