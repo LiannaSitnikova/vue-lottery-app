@@ -2,9 +2,8 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUsersStore } from '@/entities/user';
-import { useForm } from 'vee-validate';
-import * as yup from 'yup';
 import { WinnersList } from '@/widgets/winners-list';
+import { UserForm } from '@/features/user-form';
 import { AppButton, AppInput } from '@/shared/ui';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
@@ -85,37 +84,15 @@ const changePage = (newPage: number) => {
   router.push({ query: { ...route.query, page: newPage } });
 };
 
-const addUserSchema = yup.object({
-  firstName: yup.string().required('Поле є обов\'язковим'),
-  lastName: yup.string().required('Поле є обов\'язковим'),
-  email: yup.string().required('Поле є обов\'язковим').email('Некоректний формат email'),
-  username: yup.string().required('Поле є обов\'язковим'),
-  password: yup.string().required('Поле є обов\'язковим').min(5, 'Мінімум 5 символів'),
-  age: yup.string().required('Поле є обов\'язковим'),
-  gender: yup.string().required('Поле є обов\'язковим'),
-  phone: yup.string().required('Поле є обов\'язковим'),
-});
-
-const { handleSubmit, errors, resetForm, defineField } = useForm({ validationSchema: addUserSchema });
-const [firstName] = defineField('firstName');
-const [lastName] = defineField('lastName');
-const [email] = defineField('email');
-const [username] = defineField('username');
-const [password] = defineField('password');
-const [age] = defineField('age');
-const [gender] = defineField('gender');
-const [phone] = defineField('phone');
-
-const onCreateUser = handleSubmit(async (values) => {
+const onCreateUser = async (values: any) => {
   try {
-    await usersStore.createUser(values as any); 
+    await usersStore.createUser(values); 
     isAddModalOpen.value = false;
-    resetForm();
     toast.add({ severity: 'success', summary: 'Успіх', detail: 'Користувача успішно створено!', life: 3000 });
   } catch (e: any) {
     toast.add({ severity: 'error', summary: 'Помилка', detail: e.message || 'Не вдалося створити користувача', life: 3000 });
   }
-});
+};
 
 const deleteUser = (id: number) => {
   confirm.require({
@@ -217,32 +194,14 @@ const deleteUser = (id: number) => {
         </AppButton>
       </div>
 
-      <!-- Модальне вікно створення користувача -->
+      <!-- Модальне вікно із використанням фічі UserForm -->
       <div v-if="isAddModalOpen" class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-xl w-full max-w-2xl transform transition-all">
           <h3 class="text-xl font-bold mb-6 text-gray-800 dark:text-gray-100 border-b dark:border-slate-700 pb-3">
             Створити нового користувача
           </h3>
           
-          <form @submit="onCreateUser" class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
-            <AppInput v-model="firstName" label="First Name" placeholder="Введіть ім'я" :error="errors.firstName" />
-            <AppInput v-model="lastName" label="Last Name" placeholder="Введіть прізвище" :error="errors.lastName" />
-            <AppInput v-model="email" label="Email" placeholder="example@mail.com" :error="errors.email" />
-            <AppInput v-model="username" label="Username" placeholder="username" :error="errors.username" />
-            <AppInput v-model="password" type="password" label="Password" placeholder="••••••••" :error="errors.password" />
-            <AppInput v-model="age" type="number" label="Age" placeholder="Вік" :error="errors.age" />
-            <AppInput v-model="gender" label="Gender" placeholder="male / female" :error="errors.gender" />
-            <AppInput v-model="phone" label="Phone" placeholder="+380..." :error="errors.phone" />
-
-            <div class="md:col-span-2 flex justify-end gap-3 mt-4 border-t dark:border-slate-700 pt-4">
-              <AppButton type="button" variant="secondary" @click="isAddModalOpen = false">
-                Скасувати
-              </AppButton>
-              <AppButton type="submit" variant="primary">
-                Зберегти
-              </AppButton>
-            </div>
-          </form>
+          <UserForm @submit="onCreateUser" @cancel="isAddModalOpen = false" />
         </div>
       </div>
     </div>

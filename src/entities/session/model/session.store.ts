@@ -2,20 +2,20 @@ import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import { ServiceProvider } from '@/shared/api';
 import type { AuthService } from '../api/auth.service';
-import type { User } from '@/entities/user';
+import type { AuthUser } from './types'; 
 
 export const useSessionStore = defineStore(
   'session',
   () => {
     const accessToken = ref<string | null>(null);
     const refreshToken = ref<string | null>(null);
-    const user = ref<User | null>(null);
+    const user = ref<AuthUser | null>(null);
 
     const isAuthenticated = computed(() => !!accessToken.value);
 
     const getAuthService = () => ServiceProvider.get<AuthService>('auth');
 
-    function setSession(tokens: { accessToken: string; refreshToken: string }, userData?: User) {
+    function setSession(tokens: { accessToken: string; refreshToken: string }, userData?: AuthUser) {
       accessToken.value = tokens.accessToken;
       refreshToken.value = tokens.refreshToken;
       if (userData) {
@@ -31,17 +31,18 @@ export const useSessionStore = defineStore(
 
     async function login(username: string, pass: string) {
       const res = await getAuthService().login(username, pass);
-      const userData: User = {
+      const userData: AuthUser = {
         id: res.id,
         firstName: res.firstName,
         lastName: res.lastName,
         email: res.email,
         username: res.username,
         gender: res.gender,
-        age: 25,
-        phone: '+380000000000',
+        image: res.image || '',
       };
-      setSession({ accessToken: res.accessToken, refreshToken: res.refreshToken }, userData);
+      
+     const token = res.accessToken || res.token || '';
+      setSession({ accessToken: token, refreshToken: res.refreshToken || '' }, userData);
     }
 
     async function fetchCurrentUser() {
@@ -70,6 +71,6 @@ export const useSessionStore = defineStore(
     };
   },
   {
-    persist: true, 
-}
+    persist: true,
+  }
 );

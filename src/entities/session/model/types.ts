@@ -1,4 +1,4 @@
-export interface AuthResponse {
+export interface AuthUser {
   id: number;
   username: string;
   email: string;
@@ -6,6 +6,10 @@ export interface AuthResponse {
   lastName: string;
   gender: string;
   image: string;
-  accessToken: string;
-  refreshToken: string;
+}
+
+export interface AuthResponse extends AuthUser {
+  accessToken: string;  
+  refreshToken?: string;
+  token?: string;     
 }
