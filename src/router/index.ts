@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/auth.store';
-import DefaultLayout from '../layouts/DefaultLayout.vue';
-import AuthLayout from '../layouts/AuthLayout.vue';
+import DefaultLayout from '@/app/layouts/DefaultLayout.vue';
+import AuthLayout from '@/app/layouts/AuthLayout.vue';
 
 const routes = [
   {
@@ -11,32 +11,32 @@ const routes = [
       {
         path: '',
         name: 'home',
-        component: () => import('../views/HomeView.vue'),
+        component: () => import('@/pages/home/ui/HomeView.vue'),
         meta: { title: 'Головна' },
       },
       {
         path: 'about',
         name: 'about',
-        component: () => import('../views/AboutView.vue'),
+        component: () => import('@/pages/about/ui/AboutView.vue'),
         meta: { title: 'Про автора' },
       },
       {
         path: 'users',
         name: 'users',
-        component: () => import('../views/UsersView.vue'),
+        component: () => import('@/pages/users/ui/UsersView.vue'),
         meta: { requiresAuth: true, title: 'Користувачі' },
       },
       {
         path: 'users/:id',
         name: 'user-detail',
-        component: () => import('../views/UserDetailView.vue'),
+        component: () => import('@/pages/user-detail/ui/UserDetailView.vue'),
         props: true,
         meta: { requiresAuth: true, title: 'Деталі користувача' },
       },
       {
         path: 'users/:id/edit',
         name: 'user-edit',
-        component: () => import('../views/UserEditView.vue'),
+        component: () => import('@/pages/user-edit/ui/UserEditView.vue'),
         props: true,
         meta: { requiresAuth: true, title: 'Редагувати користувача' },
       },
@@ -49,7 +49,7 @@ const routes = [
       {
         path: 'login',
         name: 'login',
-        component: () => import('../views/LoginView.vue'),
+        component: () => import('@/pages/login/ui/LoginView.vue'),
         meta: { title: 'Авторизація' },
       },
     ],
@@ -57,7 +57,7 @@ const routes = [
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
-    component: () => import('../views/NotFoundView.vue'),
+    component: () => import('@/pages/not-found/ui/NotFoundView.vue'),
     meta: { title: '404 - Сторінку не знайдено' },
   },
 ];

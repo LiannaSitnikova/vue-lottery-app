@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { User, CreateUserDto, UpdateUserDto } from '../types';
-import { ServiceProvider } from '../services/service-provider';
+import type { User, CreateUserDto, UpdateUserDto } from '@/entities/user';
+import { ServiceProvider } from '@/shared/api';
 
 export const useUsersStore = defineStore('users', () => {
   const users = ref<User[]>([]);
@@ -17,7 +17,7 @@ export const useUsersStore = defineStore('users', () => {
     try {
       const res = await ServiceProvider.users.getAll(params);
       
-      users.value = res.users.map(user => {
+      users.value = res.users.map((user: User) => {
         if (localUpdates.value[user.id]) {
           return { ...user, ...localUpdates.value[user.id] };
         }
