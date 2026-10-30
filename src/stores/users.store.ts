@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { User, CreateUserDto, UpdateUserDto } from '@/entities/user';
+import type { User, CreateUserDto, UpdateUserDto, UserService } from '@/entities/user';
 import { ServiceProvider } from '@/shared/api';
 
 export const useUsersStore = defineStore('users', () => {
@@ -9,13 +9,15 @@ export const useUsersStore = defineStore('users', () => {
   const isLoading = ref(false);
   const errorMessage = ref('');
   
-  const localUpdates = ref<Record<number, Partial<User>>>({});
+  const localUpdates = ref<Record<number, Partial<User>>>( {});
+
+  const getUserService = () => ServiceProvider.get<UserService>('users');
 
   async function fetchUsers(params: { limit?: number; skip?: number; q?: string } = {}) {
     isLoading.value = true;
     errorMessage.value = '';
     try {
-      const res = await ServiceProvider.users.getAll(params);
+      const res = await getUserService().getAll(params);
       
       users.value = res.users.map((user: User) => {
         if (localUpdates.value[user.id]) {
@@ -33,14 +35,14 @@ export const useUsersStore = defineStore('users', () => {
   }
 
   async function addUser(data: CreateUserDto) {
-    const newUser = await ServiceProvider.users.create(data);
+    const newUser = await getUserService().create(data);
     const createdWithId = { ...newUser, ...data, id: Date.now() };
     users.value.unshift(createdWithId);
     total.value += 1;
   }
 
   async function updateUser(id: number, data: UpdateUserDto) {
-    await ServiceProvider.users.update(id, data);
+    await getUserService().update(id, data);
     
     localUpdates.value[id] = data;
 
@@ -51,7 +53,7 @@ export const useUsersStore = defineStore('users', () => {
   }
 
   async function removeUser(id: number) {
-    await ServiceProvider.users.delete(id);
+    await getUserService().delete(id);
     users.value = users.value.filter(u => u.id !== id);
     total.value -= 1;
   }

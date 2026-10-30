@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ServiceProvider } from '@/shared/api';
+import type { UserService } from '@/entities/user';
 import { useUsersStore } from '@/stores/users.store';
 
 const props = defineProps<{ id: string }>();
@@ -20,7 +21,8 @@ const form = ref({
 
 onMounted(async () => {
   try {
-    const user = await ServiceProvider.users.getById(Number(props.id));
+    const userService = ServiceProvider.get<UserService>('users');
+    const user = await userService.getById(Number(props.id));
     form.value = {
       firstName: user.firstName || '',
       lastName: user.lastName || '',

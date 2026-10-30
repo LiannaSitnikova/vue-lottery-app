@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { ServiceProvider } from '@/shared/api';
-import type { User } from '@/entities/user';
+import type { User, UserService } from '@/entities/user';
 
 const props = defineProps<{ id: string }>();
 const user = ref<User | null>(null);
@@ -9,7 +9,8 @@ const isLoading = ref(true);
 
 onMounted(async () => {
   try {
-    user.value = await ServiceProvider.users.getById(Number(props.id));
+    const userService = ServiceProvider.get<UserService>('users');
+    user.value = await userService.getById(Number(props.id));
   } finally {
     isLoading.value = false;
   }

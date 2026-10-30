@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { User } from '@/entities/user';
-import { ServiceProvider } from '@/shared/api/service-provider';
+import { ServiceProvider } from '@/shared/api';
+import type { AuthService } from '@/entities/session';
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null);
@@ -9,6 +10,8 @@ export const useAuthStore = defineStore('auth', () => {
   const refreshToken = ref<string | null>(localStorage.getItem('refreshToken'));
 
   const isAuthenticated = computed(() => !!accessToken.value);
+
+  const getAuthService = () => ServiceProvider.get<AuthService>('auth');
 
   function setTokens(access: string, refresh: string) {
     accessToken.value = access;
@@ -26,7 +29,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function login(username: string, pass: string) {
-    const res = await ServiceProvider.auth.login(username, pass);
+    const res = await getAuthService().login(username, pass);
     setTokens(res.accessToken, res.refreshToken);
     user.value = {
       id: res.id,
@@ -43,7 +46,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function fetchCurrentUser() {
     if (!accessToken.value) return;
     try {
-      user.value = await ServiceProvider.auth.getCurrentUser();
+      user.value = await getAuthService().getCurrentUser();
     } catch {
       clearAuth();
     }
